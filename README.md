@@ -30,7 +30,6 @@ The system was designed to handle a research knowledge base on the order of **5,
 ## System Architecture
 ```mermaid
   graph TD
-graph TD
     A["User query"]
     
     B["Query understanding & rewriting<br>multi-turn rewrite · intent · HyDE"]
