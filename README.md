@@ -29,8 +29,6 @@ The system was designed to handle a research knowledge base on the order of **5,
 
 ## System Architecture
 
-graph TD
-
     %% Utility Modules
     subgraph UtilModules ["🛠️ Utility Modules"]
         Logger["📝 Logger Utils<br/>get_logger.py"]
