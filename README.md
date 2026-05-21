@@ -30,19 +30,29 @@ The system was designed to handle a research knowledge base on the order of **5,
 ## System Architecture
 ```mermaid
   graph TD
-    A["User query"] --> B["Query understanding & rewriting<br/>multi-turn rewrite · intent · HyDE"]
+graph TD
+    A["User query"]
     
-    B --> C["Vector search<br/>Milvus HNSW · fine-tuned emb."]
-    B --> D["Keyword search<br/>BM25 · Elasticsearch"]
+    B["Query understanding & rewriting<br>multi-turn rewrite · intent · HyDE"]
+    A --> B
     
-    C --> E["RRF fusion + dynamic weighting<br/>reciprocal rank fusion · intent weights"]
+    C["Vector search<br>Milvus HNSW · fine-tuned emb."]
+    D["Keyword search<br>BM25 · Elasticsearch"]
+    B --> C
+    B --> D
+    
+    E["RRF fusion + dynamic weighting<br>reciprocal rank fusion · intent weights"]
+    C --> E
     D --> E
     
-    E --> F["Cross-encoder rerank + NLI check<br/>top-K rerank · INT8 · verification"]
+    F["Cross-encoder rerank + NLI check<br>top-K rerank · INT8 · verification"]
+    E --> F
     
-    F --> G["Answer generation + hallucination control<br/>grounded generation · streaming"]
+    G["Answer generation + hallucination control<br>grounded generation · streaming"]
+    F --> G
     
-    G --> H["Answer + citations<br/>[1] 10-K · §3.1 · p.42"]
+    H["Answer + citations<br>[1] 10-K · §3.1 · p.42"]
+    G --> H
 ```
 
 ---
