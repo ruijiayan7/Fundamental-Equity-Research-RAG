@@ -139,7 +139,7 @@ A chunking strategy with **semantic awareness** that respects financial document
 ### Installation
 
 ```bash
-git clone https://github.com/<your-username>/equity-research-rag.git
+git clone https://github.com/<your-username>/Fundamental-Equity-Research-RAG.git
 cd equity-research-rag
 
 python -m venv .venv
