@@ -20,10 +20,8 @@ The system was designed to handle a research knowledge base on the order of **5,
 | Metric | Before | After |
 |---|---|---|
 | Retrieval MRR | 0.72 | **0.92** (+28%) |
-| Top-5 Recall | — | **93%** |
 | Document parsing accuracy | 82% | **97%** |
 | Chunk-split recall | 67% | **91%** |
-| Answer accuracy | — | **94%** |
 | User trust score | 6.8/10 | **8.4/10** |
 | P99 latency | 350ms | **150ms** |
 
