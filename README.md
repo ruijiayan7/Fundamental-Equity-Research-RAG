@@ -1,4 +1,4 @@
-# Equity Research RAG
+#Fundamental Equity Research RAG System
 
 > A retrieval-augmented question-answering system purpose-built for **fundamental equity research** — turning annual reports, earnings transcripts, broker notes, and financial statements into grounded, fully source-attributed answers.
 
@@ -30,223 +30,49 @@ The system was designed to handle a research knowledge base on the order of **5,
 ## System Architecture
 ```mermaid
 graph TD
+    %% Node Definitions with HTML formatting for bold titles and line breaks
+    Q(["User query"])
+    
+    QU["<b>Query understanding & rewriting</b><br/>multi-turn rewrite · intent · HyDE"]
+    
+    VS["<b>Vector search</b><br/>Milvus HNSW · fine-tuned emb."]
+    
+    KS["<b>Keyword search</b><br/>BM25 · Elasticsearch"]
+    
+    RRF["<b>RRF fusion + dynamic weighting</b><br/>reciprocal rank fusion · intent weights"]
+    
+    Rerank["<b>Cross-encoder rerank + NLI check</b><br/>top-K rerank · INT8 · verification"]
+    
+    Gen["<b>Answer generation + hallucination control</b><br/>grounded generation · streaming"]
+    
+    Ans["<b>Answer + citations</b><br/>[1] 10-K · §3.1 · p.42"]
 
-    %% Utility Modules
-    subgraph UtilModules ["🛠️ Utility Modules"]
-        Logger["📝 Logger Utils<br/>get_logger.py"]
-        Database["🔌 Database Utils<br/>database.py"]
-        Password["🔐 Password Utils<br/>password.py"]
-        Migration["📊 DB Migration<br/>alembic"]
-    end
+    %% Flow/Edge Connections
+    Q --> QU
+    QU --> VS
+    QU --> KS
+    
+    %% Bringing the hybrid search paths back together
+    VS --> RRF
+    KS --> RRF
+    
+    RRF --> Rerank
+    Rerank --> Gen
+    Gen --> Ans
 
-    %% Infrastructure
-    subgraph Infrastructure ["🐳 Infrastructure"]
-        Docker["🐳 Docker Containerization"]
-        DockerCompose["📦 Docker Compose<br/>Orchestration"]
-        APIContainer("swxy_api Container")
-        PostgreSQLContainer("gsk_pg Container")
-        ESContainer("es01 Container")
-        RedisContainer("redis Container")
-        NLTKData("📚 NLTK Data Mount")
-        FileVolume("📁 File Storage Mount")
+    %% Custom Styling to match the original image colors
+    classDef queryNode fill:#f4f0ea,stroke:#c4c0b8,stroke-width:1px,color:#333;
+    classDef purpleNode fill:#ebe9fb,stroke:#a69ee0,stroke-width:1px,color:#35277a;
+    classDef greenNode fill:#d9f1e4,stroke:#86bc9e,stroke-width:1px,color:#0a5a3a;
+    classDef orangeNode fill:#fbe8e0,stroke:#dda48f,stroke-width:1px,color:#7a240e;
+    classDef blueNode fill:#e4effb,stroke:#9fbfe0,stroke-width:1px,color:#043a6b;
 
-        DockerCompose --> APIContainer
-        DockerCompose --> PostgreSQLContainer
-        DockerCompose --> ESContainer
-        DockerCompose --> RedisContainer
-        Docker --> NLTKData
-        Docker --> FileVolume
-    end
-
-    %% Main Flow
-    User["👤 User Request"]
-    FastAPI["🌐 FastAPI Entry<br/>app_main.py"]
-
-    User --> FastAPI
-
-    Auth["🔐 JWT Auth Middleware<br/>access_security"]
-    CORS["🌍 CORS Middleware"]
-
-    FastAPI --> Auth
-    FastAPI --> CORS
-
-    Router{"🧭 Router Dispatch"}
-    FastAPI --> Router
-
-    UserRouter["👥 User Router<br/>user_rt.py"]
-    HistoryRouter["📜 History Router<br/>history_rt.py"]
-
-    Router --> UserRouter
-    Router --> HistoryRouter
-
-    subgraph ChatFlow ["💬 Chat Service Flow"]
-        ChatRouter["💬 Chat Router<br/>chat_rt.py"]
-        Router --> ChatRouter
-
-        CreateSession["Create Session<br/>create_session"]
-        QuickParse["Quick Parse<br/>quick_parse"]
-        GetContent["Get Content<br/>get_parsed_content"]
-        ChatOnDocs["Chat on Docs<br/>chat_on_docs"]
-        UploadFiles["Upload Files<br/>upload_files"]
-
-        ChatRouter --> CreateSession
-        ChatRouter --> QuickParse
-        ChatRouter --> GetContent
-        ChatRouter --> ChatOnDocs
-        ChatRouter --> UploadFiles
-
-        QuickParseService["📄 Quick Parse Service<br/>quick_parse_service.py"]
-        QuickParse --> QuickParseService
-
-        DocumentParsers{"Document Parsers"}
-        QuickParseService --> DocumentParsers
-
-        PDFParser["PDF Parser<br/>pdfplumber"]
-        DOCXParser["DOCX Parser<br/>python-docx"]
-        TXTParser["TXT Parser<br/>Encoding Detection"]
-        RedisStore["📦 Redis Store<br/>2-Hour Expiry"]
-
-        DocumentParsers --> PDFParser
-        DocumentParsers --> DOCXParser
-        DocumentParsers --> TXTParser
-        DocumentParsers --> RedisStore
-    end
-
-    subgraph FileProcessing ["📁 File Processing Flow"]
-        DocumentService["📋 Document Service<br/>document_operations.py"]
-        FileParser["📄 File Parsing<br/>file_parse.py"]
-
-        UploadFiles --> DocumentService
-        DocumentService --> FileParser
-
-        subgraph DeepDocEngine ["🔍 DeepDoc Parsing Engine"]
-            DeepDoc["🔍 DeepDoc Engine"]
-            FileParser --> DeepDoc
-
-            MultiParsers{"Multi-Format Parsers"}
-            DeepDoc --> MultiParsers
-
-            PDFDeepParser["PDF Parser<br/>pdf_parser.py"]
-            DOCXDeepParser["DOCX Parser<br/>docx_parser.py"]
-            ExcelParser["Excel Parser<br/>excel_parser.py"]
-            MarkdownParser["Markdown Parser<br/>markdown_parser.py"]
-            HTMLParser["HTML Parser<br/>html_parser.py"]
-            JSONParser["JSON Parser<br/>json_parser.py"]
-            PPTParser["PPT Parser<br/>ppt_parser.py"]
-
-            MultiParsers --> PDFDeepParser
-            MultiParsers --> DOCXDeepParser
-            MultiParsers --> ExcelParser
-            MultiParsers --> MarkdownParser
-            MultiParsers --> HTMLParser
-            MultiParsers --> JSONParser
-            MultiParsers --> PPTParser
-
-            ParsedContent["📄 Parsed Document Content"]
-            DeepDoc --> ParsedContent
-        end
-
-        subgraph VisionProcessing ["🖼️ Vision Processing Submodule"]
-            OCR["OCR Recognition<br/>ocr.py"]
-            LayoutRec["Layout Recognition<br/>layout_recognizer.py"]
-            TableRec["Table Recognition<br/>table_structure_recognizer.py"]
-        end
-
-        PDFDeepParser -.-> VisionProcessing
-        DOCXDeepParser -.-> VisionProcessing
-        PPTParser -.-> VisionProcessing
-
-        ChunkProcessing["📋 Chunk Processing<br/>Chunk Splitting"]
-        EmbeddingGen["🎯 Embedding Generation<br/>generate_embedding"]
-        ESIndexing["📊 ES Indexing<br/>Store Chunks + Vectors"]
-
-        ParsedContent --> ChunkProcessing
-        ChunkProcessing --> EmbeddingGen
-        EmbeddingGen --> ESIndexing
-    end
-
-    subgraph ChatEngine ["🤖 Chat Engine"]
-        RetrievalStep["🔍 Content Retrieval"]
-        ChatStep["🤖 Chat Generation"]
-
-        ChatOnDocs --> RetrievalStep
-        ChatOnDocs --> ChatStep
-
-        subgraph RetrievalEngine ["🔍 Retrieval Engine"]
-            RetrievalCore["🧠 Retrieval Core<br/>retrieval.py"]
-            RAGDealer["RAG Dealer<br/>Dealer Class"]
-            ESQuery["🔎 ES Query<br/>search_v2.py"]
-
-            RetrievalStep --> RetrievalCore
-            RetrievalCore --> RAGDealer
-            RAGDealer --> ESQuery
-        end
-
-        ChatCore["💭 Chat Core<br/>chat.py"]
-        ChatStep --> ChatCore
-
-        GenQuestions["Generate Recommended Qs"]
-        GenSessionName["Generate Session Name"]
-        SaveToDB["💾 Save to DB"]
-
-        ChatCore --> GenQuestions
-        ChatCore --> GenSessionName
-        ChatCore --> SaveToDB
-
-        QuickContent["Quick Content Fetch<br/>Fetch from Redis"]
-        ChatCore --> QuickContent
-
-        HybridRanking["📊 Hybrid Ranking<br/>Vector + Full-Text Weighting"]
-        KnowledgeContent["📚 Knowledge Base Fetch<br/>Return Relevant Chunks"]
-
-        HybridRanking --> KnowledgeContent
-
-        PromptConstruct["📝 Prompt Construction<br/>Concat KB + Quick Parse"]
-        KnowledgeContent --> PromptConstruct
-        QuickContent --> PromptConstruct
-
-        LLMCall["🧠 LLM Call<br/>OpenAI/DashScope"]
-        StreamResponse["📡 Streaming Response"]
-
-        PromptConstruct --> LLMCall
-        LLMCall --> StreamResponse
-    end
-
-    subgraph DataStorage ["💾 Data Storage Layer"]
-        Elasticsearch[("🔍 Elasticsearch<br/>Doc Index/Vector Data")]
-        PostgreSQL[("🐘 PostgreSQL<br/>Users/Sessions/Messages")]
-        Redis[("🔴 Redis<br/>Temp Content Cache")]
-        FileStorage[("📁 Local File Storage<br/>storage/file/")]
-
-        UserTable("👤 users table")
-        SessionTable("💬 sessions table")
-        MessageTable("💭 messages table")
-        KBTable("📚 knowledge_bases table")
-        UploadTable("📋 document_uploads table")
-
-        PostgreSQL --> UserTable
-        PostgreSQL --> SessionTable
-        PostgreSQL --> MessageTable
-        PostgreSQL --> KBTable
-        PostgreSQL --> UploadTable
-    end
-
-    ESQuery --> Elasticsearch
-    Elasticsearch --> HybridRanking
-    ESIndexing --> Elasticsearch
-    SaveToDB --> PostgreSQL
-    RedisStore --> Redis
-    DocumentService --> FileStorage
-
-    subgraph ExternalServices ["🌍 External Services"]
-        OpenAI["🤖 OpenAI API<br/>GPT Models"]
-        DashScope["☁️ DashScope API<br/>Alibaba Cloud LLMs"]
-        EmbeddingAPI["🎯 Embedding API<br/>Text Vectorization"]
-    end
-
-    LLMCall --> OpenAI
-    LLMCall --> DashScope
-    EmbeddingGen --> EmbeddingAPI
+    %% Applying the styles to specific nodes
+    class Q queryNode;
+    class QU,RRF purpleNode;
+    class VS,Ans greenNode;
+    class KS orangeNode;
+    class Rerank,Gen blueNode;
 ```
 
 ---
