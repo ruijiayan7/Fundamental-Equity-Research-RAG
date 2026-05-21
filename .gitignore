@@ -1,0 +1,16 @@
+
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pdf
+*.docx
+
+# 大模型与数据(可重新下载)
+*.onnx
+*.model
+*.trie
+nltk_data/
+.DS_Store
+
+*.mp4

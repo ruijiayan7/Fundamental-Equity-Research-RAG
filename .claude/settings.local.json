@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls *)",
+      "Bash(xargs cat *)",
+      "Bash(docker exec swxy_api python3 -c ' *)",
+      "Bash(docker exec *)",
+      "Bash(docker compose *)",
+      "Bash(python3 -)"
+    ]
+  }
+}

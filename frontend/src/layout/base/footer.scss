@@ -1,0 +1,43 @@
+.base-layout-footer {
+  flex-shrink: 0;
+  padding: 12px 18px;
+
+  .base-layout-footer__main {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    .header {
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      .avatar {
+        background-color: #E8784A;
+        border-color: #E8784A;
+        color: white;
+
+        .ant-avatar-string {
+          font-size: 28px;
+          font-weight: bold;
+        }
+      }
+
+      .edit {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        opacity: 0.5;
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+
+    .username {
+      font-size: 13px;
+      color: #555;
+    }
+  }
+}
