@@ -30,49 +30,19 @@ The system was designed to handle a research knowledge base on the order of **5,
 ## System Architecture
 ```mermaid
 graph TD
-    %% Node Definitions with HTML formatting for bold titles and line breaks
-    Q(["User query"])
+    A[User query] --> B[Query understanding & rewriting<br/>multi-turn rewrite · intent · HyDE]
     
-    QU["<b>Query understanding & rewriting</b><br/>multi-turn rewrite · intent · HyDE"]
+    B --> C[Vector search<br/>Milvus HNSW · fine-tuned emb.]
+    B --> D[Keyword search<br/>BM25 · Elasticsearch]
     
-    VS["<b>Vector search</b><br/>Milvus HNSW · fine-tuned emb."]
+    C --> E[RRF fusion + dynamic weighting<br/>reciprocal rank fusion · intent weights]
+    D --> E
     
-    KS["<b>Keyword search</b><br/>BM25 · Elasticsearch"]
+    E --> F[Cross-encoder rerank + NLI check<br/>top-K rerank · INT8 · verification]
     
-    RRF["<b>RRF fusion + dynamic weighting</b><br/>reciprocal rank fusion · intent weights"]
+    F --> G[Answer generation + hallucination control<br/>grounded generation · streaming]
     
-    Rerank["<b>Cross-encoder rerank + NLI check</b><br/>top-K rerank · INT8 · verification"]
-    
-    Gen["<b>Answer generation + hallucination control</b><br/>grounded generation · streaming"]
-    
-    Ans["<b>Answer + citations</b><br/>[1] 10-K · §3.1 · p.42"]
-
-    %% Flow/Edge Connections
-    Q --> QU
-    QU --> VS
-    QU --> KS
-    
-    %% Bringing the hybrid search paths back together
-    VS --> RRF
-    KS --> RRF
-    
-    RRF --> Rerank
-    Rerank --> Gen
-    Gen --> Ans
-
-    %% Custom Styling to match the original image colors
-    classDef queryNode fill:#f4f0ea,stroke:#c4c0b8,stroke-width:1px,color:#333;
-    classDef purpleNode fill:#ebe9fb,stroke:#a69ee0,stroke-width:1px,color:#35277a;
-    classDef greenNode fill:#d9f1e4,stroke:#86bc9e,stroke-width:1px,color:#0a5a3a;
-    classDef orangeNode fill:#fbe8e0,stroke:#dda48f,stroke-width:1px,color:#7a240e;
-    classDef blueNode fill:#e4effb,stroke:#9fbfe0,stroke-width:1px,color:#043a6b;
-
-    %% Applying the styles to specific nodes
-    class Q queryNode;
-    class QU,RRF purpleNode;
-    class VS,Ans greenNode;
-    class KS orangeNode;
-    class Rerank,Gen blueNode;
+    G --> H[Answer + citations<br/>[1] 10-K · §3.1 · p.42]
 ```
 
 ---
